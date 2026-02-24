@@ -2,86 +2,51 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Leaderboard Economy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economy - Sélection du Serveur</title>
     <style>
-        :root {
-            --bg: #0f0f13;
-            --card-bg: rgba(20, 20, 28, 0.7);
-            --accent: #7281df;
-        }
-        body {
-            background-color: var(--bg);
-            color: white;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            width: 90%;
-            max-width: 1200px;
-            margin-top: 50px;
-        }
-        /* Style inspiré de ton image */
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            transition: transform 0.2s;
-            cursor: pointer;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .avatar {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            border: 2px solid var(--accent);
-            box-shadow: 0 0 15px rgba(114, 129, 223, 0.4);
-        }
-        .badge {
-            background: var(--accent);
-            padding: 4px 12px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            margin-top: 10px;
-            display: inline-block;
-        }
+        :root { --bg: #0b0b0e; --card: #111214; --accent: #5865F2; --text: #ffffff; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; display: flex; flex-direction: column; align-items: center; }
+        h1 { margin-bottom: 30px; font-weight: 800; letter-spacing: 1px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 100%; max-width: 1100px; }
+        .server-card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: pointer; display: flex; align-items: center; gap: 15px; position: relative; overflow: hidden; }
+        .server-card:hover { transform: translateY(-5px); border-color: var(--accent); background: #16171a; }
+        .server-card img { width: 60px; height: 60px; border-radius: 15px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); }
+        .server-info b { display: block; font-size: 1.1em; margin-bottom: 4px; }
+        .server-info span { opacity: 0.6; font-size: 0.9em; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-top: 50px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <h1>🏆 Leaderboard Global</h1>
-    <div id="container" class="grid">
-        </div>
+    <div id="loading" class="loader"></div>
+    <div class="grid" id="serverGrid"></div>
 
     <script>
-        // Remplace par l'IP de ton serveur Pterodactyl
-        const API_URL = "http://89.187.7.33:3000";
+        const WORKER_URL = "https://leaderboard.lyven-pro08.workers.dev";
 
-        async function loadServers() {
-            const res = await fetch(`${API_URL}/api/servers`);
-            const servers = await res.json();
-            const container = document.getElementById('container');
-
-            container.innerHTML = servers.map(s => `
-                <div class="card" onclick="window.location.href='server.html?id=${s.id}'">
-                    <div class="user-info">
-                        <img src="${s.icon}" class="avatar">
-                        <div>
-                            <div style="font-weight: bold;">${s.name}</div>
-                            <div style="opacity: 0.6; font-size: 0.9em;">${s.memberCount} membres</div>
+        async function init() {
+            try {
+                const res = await fetch(`${WORKER_URL}/api/servers`);
+                const servers = await res.json();
+                document.getElementById('loading').style.display = 'none';
+                
+                const grid = document.getElementById('serverGrid');
+                grid.innerHTML = servers.map(s => `
+                    <div class="server-card" onclick="window.location.href='server.html?id=${s.id}'">
+                        <img src="${s.icon}" alt="icon">
+                        <div class="server-info">
+                            <b>${s.name}</b>
+                            <span>${s.memberCount.toLocaleString()} membres</span>
                         </div>
                     </div>
-                    <div class="badge">Voir le classement</div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (e) {
+                document.getElementById('loading').innerText = "Erreur de connexion à l'API";
+            }
         }
-        loadServers();
+        init();
     </script>
 </body>
 </html>
