@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classement Fortune</title>
+    <style>
+        :root { --bg: #0b0b0e; --card: #111214; --accent: #5865F2; --gold: #f1c40f; }
+        body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 40px; display: flex; flex-direction: column; align-items: center; }
+        .btn-back { align-self: flex-start; color: white; text-decoration: none; margin-bottom: 20px; opacity: 0.7; transition: 0.3s; }
+        .btn-back:hover { opacity: 1; color: var(--accent); }
+        .leaderboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; width: 100%; max-width: 1100px; }
+        
+        .user-card { background: var(--card); border-radius: 12px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .user-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        
+        .banner { height: 70px; background: linear-gradient(45deg, #1e1f22, var(--accent)); opacity: 0.8; }
+        .content { padding: 15px; position: relative; margin-top: -35px; }
+        
+        .avatar-container { position: relative; display: inline-block; }
+        .avatar { width: 75px; height: 75px; border-radius: 50%; border: 6px solid var(--card); background: var(--card); object-fit: cover; }
+        .glow { position: absolute; top: 0; left: 0; width: 75px; height: 75px; border-radius: 50%; box-shadow: 0 0 20px var(--accent); opacity: 0.4; z-index: -1; }
+
+        .rank { position: absolute; top: 45px; right: 15px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; color: var(--accent); border: 1px solid rgba(88, 101, 242, 0.3); }
+        .username { font-weight: 700; font-size: 1.2em; margin-top: 10px; display: block; }
+        .balance { color: var(--gold); font-weight: 600; margin-top: 5px; font-size: 1.1em; }
+        .symbol { font-size: 0.9em; opacity: 0.8; margin-left: 4px; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="btn-back">← Retour aux serveurs</a>
+    <h1 id="title">Chargement du Top...</h1>
+    
+    <div class="leaderboard-grid" id="leaderboard"></div>
+
+    <script>
+        const WORKER_URL = "https://leaderboard.lyven-pro08.workers.dev";
+        const params = new URLSearchParams(window.location.search);
+        const guildId = params.get('id');
+
+        async function loadLeaderboard() {
+            if(!guildId) return window.location.href = 'index.html';
+            
+            try {
+                const res = await fetch(`${WORKER_URL}/api/leaderboard/${guildId}`);
+                const data = await res.json();
+                
+                document.getElementById('title').innerText = `Top Fortune`;
+                
+                const container = document.getElementById('leaderboard');
+                container.innerHTML = data.users.map((user, index) => `
+                    <div class="user-card">
+                        <div class="banner"></div>
+                        <div class="content">
+                            <div class="avatar-container">
+                                <div class="glow"></div>
+                                <img src="${user.avatar}" class="avatar">
+                            </div>
+                            <div class="rank">#${index + 1}</div>
+                            <span class="username">${user.username}</span>
+                            <div class="balance">${user.balance.toLocaleString()}<span class="symbol">${data.symbol}</span></div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('title').innerText = "Erreur lors du chargement.";
+            }
+        }
+        loadLeaderboard();
+    </script>
+</body>
+</html>
