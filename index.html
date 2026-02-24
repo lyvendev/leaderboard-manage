@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaderboard Economy</title>
+    <style>
+        :root {
+            --bg: #0f0f13;
+            --card-bg: rgba(20, 20, 28, 0.7);
+            --accent: #7281df;
+        }
+        body {
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 50px;
+        }
+        /* Style inspiré de ton image */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .avatar {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 15px rgba(114, 129, 223, 0.4);
+        }
+        .badge {
+            background: var(--accent);
+            padding: 4px 12px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-top: 10px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏆 Leaderboard Global</h1>
+    <div id="container" class="grid">
+        </div>
+
+    <script>
+        // Remplace par l'IP de ton serveur Pterodactyl
+        const API_URL = "http://TON_IP_PTERO:3000";
+
+        async function loadServers() {
+            const res = await fetch(`${API_URL}/api/servers`);
+            const servers = await res.json();
+            const container = document.getElementById('container');
+
+            container.innerHTML = servers.map(s => `
+                <div class="card" onclick="window.location.href='server.html?id=${s.id}'">
+                    <div class="user-info">
+                        <img src="${s.icon}" class="avatar">
+                        <div>
+                            <div style="font-weight: bold;">${s.name}</div>
+                            <div style="opacity: 0.6; font-size: 0.9em;">${s.memberCount} membres</div>
+                        </div>
+                    </div>
+                    <div class="badge">Voir le classement</div>
+                </div>
+            `).join('');
+        }
+        loadServers();
+    </script>
+</body>
+</html>
